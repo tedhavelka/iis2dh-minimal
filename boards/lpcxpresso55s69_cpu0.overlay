@@ -1,0 +1,81 @@
+/*
+# Project "iis2dh-minimal", small Zephyr based app to debug iis2dh driver API use.
+*/
+
+/*
+# lpc55x69 dev kit dts file of interest is zephyr/boards/arm/lpcxpresso55s69/lpcxpresso55s69.dtsi
+#
+# Note:  the second alias should not be needed, but was placed here in
+#  efforts to debug iis2dh.h conditional compilation of parts of
+#  ``struct iis2dh_device_config``.
+*/
+
+/ {
+    aliases {
+        uart2 = &flexcomm2;
+        i2c0 = &flexcomm4;
+    };
+};
+
+
+
+/*
+# ----------------------------------------------------------------------
+# Reference - file where flexcomm nodes enabled for lpc55s69 MCU:
+# zephyr/boards/arm/lpcxpresso55s69/lpcxpresso55s69_cpu0.dts
+#
+# Note:  retain the following node overlay for flexcomm2, in cases where
+#  a second UART beyond Zephyr's chosen console UART is desired.
+# ----------------------------------------------------------------------
+*/
+
+&flexcomm2 {
+    compatible = "nxp,lpc-usart";
+    current-speed = <115200>;
+    status = "okay";
+};
+
+
+
+/*
+# ----------------------------------------------------------------------
+# On board lpcxpresse55s69, peripheral flexcomm4 is wired to the I2C
+# lines of this board's Arduino headers.  Therefore for this board
+# connect I2C based sensors and peripherals here in DTS:
+# ----------------------------------------------------------------------
+*/
+
+&flexcomm4 {
+
+/* See TN027-Power-On-Procedure.pdf for purpose of 0x1F and 0x1D
+   Kionix sensor addresses here:   */  
+
+        kionix_sensor: kx132_1211@1f {
+                compatible = "kionix,kx132_1211";
+                reg = <0x1F>;
+                label = "KX132_1211";
+        };
+
+        stmicro_sensor: iis2dh@19 {
+                compatible = "st,iis2dh";
+                reg = <0x19>;
+                label = "IIS2DH";
+        };
+};
+
+
+
+&green_led {
+    status = "okay";
+};
+
+&blue_led {
+    status = "okay";
+};
+
+&red_led {
+    status = "okay";
+};
+
+
+

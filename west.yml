@@ -1,0 +1,23 @@
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+
+  projects:
+    - name: zephyr
+      repo-path: zephyr
+      remote: zephyrproject-rtos
+#      revision: v3.1.0
+      revision: v3.2.0
+#      revision: 7fccdd170b74f3d7a8b1435eda0ff4cdc7c0435b
+      import: true
+
+    # Kionix driver work repository, name of remote repository followed by name of local dir into which to clone:
+    - name: zephyr-driver-work-v2
+      path: kionix-drivers
+      revision: main
+      url: https://github.com/tedhavelka/zephyr-driver-work-v2
+
+  self:
+    # This repository should be cloned to 
+    path: nexus-gateway-firmware
