@@ -6,7 +6,7 @@ Zephyr IIS2DH Driver Test
 Overview
 ********
 
-This sample aims to test an unexplained sensor driver behavior, in Zephyr RTOS' accelerometer driver for the iis2dh sensor, specically on an NXP LPC55S69 microcontroller.  The sample sets up an IIS2DH sensor as an I2C peripheral on one of this controller's serial peripherals.  NXP calls these serial peripherals "flexcomm", short for flexible communications.  They are so named in Zephyr 3.2.0 device tree sources for NXP supported boards which contain flexcomm peripherals.
+This sample aims to test an unexplained sensor driver behavior, in Zephyr RTOS' accelerometer driver for the iis2dh sensor, specifically on an NXP LPC55S69 microcontroller.  The sample sets up an IIS2DH sensor as an I2C peripheral on one of this controller's serial peripherals.  NXP calls these serial peripherals "flexcomm", short for flexible communications.  They are so named in Zephyr 3.2.0 device tree sources for NXP supported boards which contain flexcomm peripherals.
 
 This sample is also based on Zephyr's basic/blinky app.  The blinking LED function provides a sanity check, whose period can be easily changed, to show developers that the code is running.
 
@@ -22,6 +22,33 @@ The source code shows how to:
 See :ref:`pwm-blinky-sample` for a similar sample that uses the PWM API instead.
 
 .. _blinky-sample-requirements:
+
+
+Preparations To Build
+*********************
+
+This Zephyr RTOS based application builds against Zephyr 3.2.0.  It also depends on Zephyr's toolchain, which typically involves one or more cross compilers, a device tree source compiler, and a Python3 based project and build aid tool named `west`, among other compilation and flashing utilities.  If you already have a west workspace configured and updated to Zephyr 3.2.0, you may clone this project into the top dir of that west workspace and starting building.  If you prefer to build in a dedicated `west` workspace, then take the steps following the project cloning command given here:
+
+
+$ mkdir iis2dh-minimal    . . . or a project directory name of your choosing
+
+$ git clone git@github.com:tedhavelka/iis2dh-minimal.git .
+
+$ cd ..
+
+$ west init -l iis2dh-minimal
+
+$ cd iis2dh-minimal
+
+$ west update
+
+
+The step to update a newly created west workspace normally takes several minutes, maybe longer depending on one's network connection speed.  After Zephyr sources and associated third party modules have downloaded, you can build this tiny project with a command like the following:
+
+
+$ west build -b lpcxpresso55s69_cpu0
+
+
 
 Requirements
 ************
