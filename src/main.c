@@ -11,6 +11,14 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/drivers/sensor.h>
+
+// - DEV 1028 - studying and debugging Zephyr device tree macro:
+#if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
+#warning "- DEV 1028 - app side macro test for I2C device instances returns 0, \"none found\""
+#else
+#warning "- DEV 1028 - app side macro test for I2C device instances returns 1, \"one or more found\""
+#endif
+
 #include <iis2dh.h>
 
 
@@ -54,11 +62,12 @@ static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sen
     int rstatus = ROUTINE_OK;
     uint8_t cmd[] = { 0x0F };
     struct iis2dh_data *data_struc_ptr = (struct iis2dh_data *)dev->data;
-    struct iis2dh_config *config_struc_ptr = (struct iis2dh_config *)dev->config;
+    struct iis2dh_device_config *config_struc_ptr = (struct iis2dh_config *)dev->config;
     uint8_t scratch_pad_byte = 0;
 
-#if 0
+#if 1
 #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
+#warning "- DEV 1027 - DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) returns 'true', one or more devices found 'okay' on I2C bus"
     rstatus = i2c_write_read(
 //                            data_struc_ptr->bus,   // data_struc_ptr->i2c_dev,
                             config_struc_ptr->i2c.bus,
@@ -68,20 +77,23 @@ static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sen
 
     value.val1 = scratch_pad_byte;
 
-    printk("- %s - read back 'whoami' value of 0x%02x from iis2dh sensor,",
+    printk("- %s - Zephyr I2C API write_read routine returns %d,\n",
+      "whoami_query_routine", rstatus);
+    printk("- %s - read back 'whoami' value of 0x%02x from iis2dh sensor,\n\n",
       "whoami_query_routine", value.val1);
 
-#warning "- DEV 1027 - during sample app compilation DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) returns " DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
+
+
 #else
-    printk("- %s - WARNING:  iis2dh driver did not compile with I2C bus awareness!",
+    printk("- %s - WARNING:  iis2dh driver did not compile with I2C bus awareness!\n",
       "whoami_query_routine");
 
 #endif // check for I2C device instance on bus
-#endif // 0
+#endif // 0, or 1
 
-    printk("- %s - DEV 1027 - at compile time DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) returns '%u'\n",
-      RNAME_WHOAMI_QUERY, DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c));
-    printk("- %s - DEV 1027 - during build of sample app sources.\n", RNAME_WHOAMI_QUERY);
+//    printk("- %s - DEV 1027 - at compile time DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) returns '%u'\n",
+//      RNAME_WHOAMI_QUERY, DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c));
+//    printk("- %s - DEV 1027 - during build of sample app sources.\n", RNAME_WHOAMI_QUERY);
 
     return rstatus;
 }
@@ -145,7 +157,8 @@ void main(void)
         }
         k_msleep(SLEEP_TIME_MS);
 
-
+        printk("- %s - calling routine to query IIS2DH sensor for 'whoami' value . . .\n",
+          THREAD_ID__THREAD_MAIN);
         rstatus = read_iis2dh_whoami_register(sensor, value);
     }
 
