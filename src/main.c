@@ -54,14 +54,14 @@ static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sen
     int rstatus = ROUTINE_OK;
     uint8_t cmd[] = { 0x0F };
     struct iis2dh_data *data_struc_ptr = (struct iis2dh_data *)dev->data;
-    struct iis2dh_config *config_struc_ptr = (struct iis2dh_config *)dev->config;
+    struct iis2dh_device_config *config_struct_ptr = (struct iis2dh_device_config *)dev->config;
     uint8_t scratch_pad_byte = 0;
 
 #if 0
 #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
     rstatus = i2c_write_read(
 //                            data_struc_ptr->bus,   // data_struc_ptr->i2c_dev,
-                            config_struc_ptr->i2c.bus,
+                            config_struct_ptr->i2c.bus,
                             DT_INST_REG_ADDR(0),
                             cmd, sizeof(cmd),
                             &scratch_pad_byte, sizeof(scratch_pad_byte));
