@@ -6,6 +6,10 @@
 
 
 
+
+#define DT_DRV_COMPAT st_iis2dh
+
+
 // - SECTION - includes
 
 #include <zephyr/kernel.h>
@@ -14,9 +18,9 @@
 
 // - DEV 1028 - studying and debugging Zephyr device tree macro:
 #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
-#warning "- DEV 1028 - app side macro test for I2C device instances returns 0, \"none found\""
-#else
 #warning "- DEV 1028 - app side macro test for I2C device instances returns 1, \"one or more found\""
+#else
+#warning "- DEV 1028 - app side macro test for I2C device instances returns 0, \"none found\""
 #endif
 
 #include <iis2dh.h>
@@ -53,6 +57,18 @@ const struct device *sensor = DEVICE_DT_GET_ANY(st_iis2dh);
 
 
 
+//----------------------------------------------------------------------
+// Note, following two code snippets show driver change from Zephyr
+//   release 3.1.0 to Zephyr 3.2.0:
+//
+//    struct iis2dh_data *data_struc_ptr = (struct iis2dh_data *)dev->data;
+//        data_struc_ptr->bus,   // data_struc_ptr->i2c_dev,  . . . suits Zephyr 3.1.0 STMicro driver API
+//
+//    struct iis2dh_device_config *config_struct_ptr = (struct iis2dh_device_config *)dev->config;
+//        config_struct_ptr->i2c.bus,                         . . . suits Zephyr 3.2.0 STMicro driver API
+//----------------------------------------------------------------------
+
+
 
 #if 1
 static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sensor_value value)
@@ -61,7 +77,7 @@ static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sen
 
     int rstatus = ROUTINE_OK;
     uint8_t cmd[] = { 0x0F };
-    struct iis2dh_data *data_struc_ptr = (struct iis2dh_data *)dev->data;
+//    struct iis2dh_data *data_struc_ptr = (struct iis2dh_data *)dev->data;
     struct iis2dh_device_config *config_struct_ptr = (struct iis2dh_device_config *)dev->config;
     uint8_t scratch_pad_byte = 0;
 
@@ -69,12 +85,20 @@ static uint32_t read_iis2dh_whoami_register(const struct device *dev, struct sen
 #if DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c)
 #warning "- DEV 1027 - DT_ANY_INST_ON_BUS_STATUS_OKAY(i2c) returns 'true', one or more devices found 'okay' on I2C bus"
     rstatus = i2c_write_read(
-//                            data_struc_ptr->bus,   // data_struc_ptr->i2c_dev,
-                            config_struct_ptr->i2c.bus,
-                            DT_INST_REG_ADDR(0),
-                            cmd, sizeof(cmd),
-                            &scratch_pad_byte, sizeof(scratch_pad_byte));
-
+#if 0
+                             config_struct_ptr->i2c.bus,
+                             DT_INST_REG_ADDR(0),
+                             cmd, sizeof(cmd),
+                             &scratch_pad_byte, sizeof(scratch_pad_byte));
+#else
+                             config_struct_ptr->i2c.bus,
+                             0x18,
+                             cmd,
+                             1,
+                             &scratch_pad_byte,
+                             1
+#endif
+                            );
     value.val1 = scratch_pad_byte;
 
     printk("- %s - Zephyr I2C API write_read routine returns %d,\n",
@@ -116,7 +140,7 @@ void main(void)
         { printk("- %s - Success finding iis2dh device,\n", THREAD_ID__THREAD_MAIN); }
 
     if (!device_is_ready(sensor)) {
-        printk("- %s - Device %s is not ready\n", THREAD_ID__THREAD_MAIN, sensor->name);
+        printk("- %s - NOTICE!  Device %s is not ready\n", THREAD_ID__THREAD_MAIN, sensor->name);
 #if 0
         printk("- %s - Returning from this thread's entry point . . .\n\n\n", THREAD_ID__THREAD_MAIN);
         return;
